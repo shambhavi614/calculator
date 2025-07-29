@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Calculator with Sound</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="calculator">
+    <div id="display" class="display">0</div>
+    <div class="buttons">
+      <button class="clear">C</button>
+      <button class="operator">/</button>
+      <button class="operator">*</button>
+      <button class="operator">-</button>
+
+      <button>7</button>
+      <button>8</button>
+      <button>9</button>
+      <button class="operator">+</button>
+
+      <button>4</button>
+      <button>5</button>
+      <button>6</button>
+      <button>.</button>
+
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button class="equal">=</button>
+
+      <button style="grid-column: span 2;">0</button>
+    </div>
+  </div>
+
+  <!-- Click Sound -->
+  <audio id="clickSound" src="https://www.fesliyanstudios.com/play-mp3/387"></audio>
+
+  <script>
+    const display = document.getElementById("display");
+    const buttons = document.querySelectorAll("button");
+    const clickSound = document.getElementById("clickSound");
+
+    let currentInput = "";
+    let resetNext = false;
+
+    function playSound() {
+      clickSound.currentTime = 0; 
+      clickSound.play();
+    }
+
+    function updateDisplay(value) {
+      display.textContent = value || "0";
+    }
+
+    function calculate() {
+      try {
+        currentInput = eval(currentInput).toString();
+        updateDisplay(currentInput);
+        resetNext = true;
+      } catch {
+        updateDisplay("Error");
+        currentInput = "";
+      }
+    }
+
+    // Button clicks with sound
+    buttons.forEach(button => {
+      button.addEventListener("click", () => {
+        playSound();
+        const value = button.textContent;
+
+        if (value === "C") {
+          currentInput = "";
+          updateDisplay("0");
+        } 
+        else if (value === "=") {
+          calculate();
+        } 
+        else {
+          if (resetNext && !isNaN(value)) {
+            currentInput = value;
+            resetNext = false;
+          } else {
+            currentInput += value;
+          }
+          updateDisplay(currentInput);
+        }
+      });
+    });
+
+    // Keyboard Support with Sound
+    document.addEventListener("keydown", (event) => {
+      const key = event.key;
+
+      if (!isNaN(key) || "+-*/.".includes(key)) {
+        playSound();
+        if (resetNext && !isNaN(key)) {
+          currentInput = key;
+          resetNext = false;
+        } else {
+          currentInput += key;
+        }
+        updateDisplay(currentInput);
+      } 
+      else if (key === "Enter" || key === "=") {
+        event.preventDefault();
+        playSound();
+        calculate();
+      }
+      else if (key === "Backspace") {
+        playSound();
+        currentInput = currentInput.slice(0, -1);
+        updateDisplay(currentInput);
+      }
+      else if (key.toLowerCase() === "c" || key === "Escape") {
+        playSound();
+        currentInput = "";
+        updateDisplay("0");
+      }
+    });
+  </script>
+</body>
+</html>
